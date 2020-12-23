@@ -20,7 +20,7 @@ GEM
       rack
 
 PLATFORMS
-  ruby
+  x86_64-darwin-20
 
 DEPENDENCIES
   graphql!
@@ -29,4 +29,4 @@ DEPENDENCIES
   roda
 
 BUNDLED WITH
-   1.17.2
+   2.2.3
