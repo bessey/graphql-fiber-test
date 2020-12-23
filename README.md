@@ -53,3 +53,22 @@ query {
   }
 }
 ```
+
+The common case works nicely though
+
+```graphql
+query {
+  blog(id: "1") {
+    id
+    posts {
+      id
+      title
+      # This would be an N+1 but isn't
+      reply {
+        id
+        title
+      }
+    }
+  }
+}
+```
