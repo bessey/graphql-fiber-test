@@ -1,0 +1,21 @@
+PATH
+  remote: ../graphql-ruby
+  specs:
+    graphql (1.11.6)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rack (2.2.3)
+    roda (3.39.0)
+      rack
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  graphql!
+  roda
+
+BUNDLED WITH
+   1.17.2
