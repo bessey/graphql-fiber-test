@@ -25,3 +25,31 @@ query {
   }
 }
 ```
+
+However nested fields don't batch as well as I had hoped. In the following example the 3 nested post replies are all
+independently fetched, not sure why yet.
+
+```graphql
+query {
+  a: postFiber(id: "3") {
+    id
+    title
+    reply {
+      id
+      title
+      reply {
+        id
+      }
+    }
+  }
+
+  b: postFiber(id: "4") {
+    id
+    title
+    reply {
+      id
+      title
+    }
+  }
+}
+```
