@@ -6,6 +6,7 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
 gem "graphql", path: "../graphql-ruby"
 gem "roda"
+gem "webrick"
 
 group :development do
   gem "pry"

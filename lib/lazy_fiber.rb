@@ -1,4 +1,12 @@
 class LazyFiber
+  def self.enabled?
+    @enabled
+  end
+
+  def self.enabled=(bool)
+    @enabled = bool
+  end
+
   def self.build(&block)
     new(block)
   end

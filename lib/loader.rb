@@ -6,12 +6,25 @@ class LoaderManager
   attr_reader :store
 
   def find(scope, id)
-    loader = store.get(scope)
-    loader.enqueue(id)
+    loader = store.get(FindByIdLoader, [scope])
+    run_loader(loader, id)
+  end
+
+  # You could have different loaders here
+
+  private
+
+  def run_loader(loader, key)
+    loader.enqueue(key)
 
     # Where the magic happens, yield back to the interpreter so it may queue other IDs before we try and load data
-    Fiber.yield
-    loader.find(id)
+    if LazyFiber.enabled?
+      Fiber.yield
+    else
+      puts 'WARNING: Loader called without a Fiber in context, misconfigured?'
+    end
+
+    loader.find(key)
   end
 end
 
@@ -22,35 +35,57 @@ class LoaderStore
 
   attr_reader :cache
 
-  def get(scope)
-    cache[scope] ||= FindByIdLoader.new(scope)
+  def get(loader, args)
+    cache[args] ||= loader.new(*args)
   end
 end
 
-class FindByIdLoader
+# Largely inspired by graphql-batch loaders API
+class Loader
   def initialize(scope)
     @scope = scope
-    @ids_to_results = {}
+    @keys_to_results = {}
   end
 
-  attr_reader :scope, :ids_to_results
+  attr_reader :scope, :keys_to_results
 
   def enqueue(id)
-    ids_to_results[id.to_i] = nil
+    keys_to_results[id.to_i] = nil
   end
 
   def find(id)
     populate_results_if_missing
-    ids_to_results[id.to_i]
+    keys_to_results[id.to_i]
   end
 
   private
 
   def populate_results_if_missing
-    missing_values = ids_to_results.select { |k, v| v.nil? }.map(&:first)
-    return if missing_values.empty?
-    scope
-      .find(missing_values)
-      .map { |result| ids_to_results[result[:id]] = result }
+    keys_missing_values = keys_to_results.select { |k, v| v.nil? }.map(&:first)
+    return if keys_missing_values.empty?
+    perform(keys_missing_values)
+  end
+
+  def perform(_keys)
+    raise NotImplementedError
+  end
+
+  def fulfill(key, value)
+    keys_to_results[key] = value
+  end
+end
+
+class FindByIdLoader < Loader
+  def initialize(scope)
+    super
+    @scope = scope
+  end
+
+  attr_reader :scope
+
+  private
+
+  def perform(keys)
+    scope.find(keys).each { |result| fulfill(result[:id], result) }
   end
 end

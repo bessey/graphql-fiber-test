@@ -18,6 +18,7 @@ GEM
     rack (2.2.3)
     roda (3.39.0)
       rack
+    webrick (1.7.0)
 
 PLATFORMS
   x86_64-darwin-20
@@ -27,6 +28,7 @@ DEPENDENCIES
   pry
   pry-byebug
   roda
+  webrick
 
 BUNDLED WITH
    2.2.3
