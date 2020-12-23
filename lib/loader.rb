@@ -1,3 +1,4 @@
+# Registration system for Loaders
 class LoaderManager
   def initialize
     @store = LoaderStore.new
@@ -28,6 +29,7 @@ class LoaderManager
   end
 end
 
+# Per query store for instances of loaders
 class LoaderStore
   def initialize
     @cache = {}
@@ -75,6 +77,7 @@ class Loader
   end
 end
 
+# Trivial example loader
 class FindByIdLoader < Loader
   def initialize(scope)
     super
