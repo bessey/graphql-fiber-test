@@ -1,24 +1,34 @@
-class PostType < GraphQL::Schema::Object
+class BaseField < GraphQL::Schema::Field
+  # Add FiberResolveExtension to all fields. Probably a better way to do this...
+  def initialize(*args, extensions: [], **kwargs, &block)
+    super(*args, extensions: extensions.concat([FiberResolveExtension]), **kwargs, &block)
+  end
+end
+class BaseObject < GraphQL::Schema::Object
+  field_class BaseField
+end
+
+class PostType < BaseObject
   description 'A blog post'
   field :id, ID, null: false
   field :title, String, null: false
-  field :reply, PostType, null: false, extensions: [FiberResolveExtension]
+  field :reply, PostType, null: false
 
   def reply
     context.loader.find(Post, object[:id] + 100)
   end
 end
-class BlogType < GraphQL::Schema::Object
+class BlogType < BaseObject
   description 'A blog'
   field :id, ID, null: false
   field :title, String, null: false
-  field :posts, [PostType], null: false, extensions: [FiberResolveExtension]
+  field :posts, [PostType], null: false
 
   def posts
     100.times.map { |i| { id: i, title: "My blog post #{i}" } }
   end
 end
-class QueryType < GraphQL::Schema::Object
+class QueryType < BaseObject
   description 'The query root of this schema'
 
   field :post, PostType, null: true do
@@ -26,12 +36,12 @@ class QueryType < GraphQL::Schema::Object
     argument :id, ID, required: true
   end
 
-  field :post_fiber, PostType, null: true, extensions: [FiberResolveExtension] do
+  field :post_fiber, PostType, null: true do
     description 'Find a post by ID'
     argument :id, ID, required: true
   end
 
-  field :blog, BlogType, null: true, extensions: [FiberResolveExtension] do
+  field :blog, BlogType, null: true do
     description 'Find a blog by ID'
     argument :id, ID, required: true
   end
